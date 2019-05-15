@@ -9,10 +9,20 @@
 
 namespace Simplicity
 {
-    void trivial_muna_function()
+    
+LayerSkewer::LayerSkewer(Rewrap::Structure prim_struc, Rewrap::Structure super_struc, const int prim_stacking_vec_index, const int super_stacking_vec_index): prim_struc(prim_struc), super_struc(super_struc), prim_stacking_vec_index(prim_stacking_vec_index), super_stacking_vec_index(super_stacking_vec_index)
     {
-        std::cout<<"Nice haircut"<<std::endl;
+        skewed_strucs.push_back(super_struc);        
+    }
+
+void LayerSkewer::skew_super_struc(const int a_multiple, const int b_multiple)
+    {
         return;
     }
 
-} // namespace SuperBoxy
+void LayerSkewer::generate_skewed_strucs(const bool distinct_only)
+    {
+        return;
+    }
+    
+}
