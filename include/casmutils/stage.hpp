@@ -22,7 +22,7 @@ public:
 
     /// Construct by providing primitive structure and superstructure (assumed to be layered)
     /// Optionally can specify the index of the out-of-layer lattice vector for each structure, called c (default is third)
-    LayerSkewer(const Rewrap::Structure &prim_struc, const Rewrap::Structure &layered_struc, STACKING_DIRECTION stack_vec);
+    LayerSkewer(const Rewrap::Structure &prim_struc, const Rewrap::Structure &layered_struc, STACKING_DIRECTION stacking_direction);
 
     /// Generate all distinct skewed versions of superstructure
     //TODO: Think of making this std::set and coming up with clever comparator
@@ -37,14 +37,14 @@ private:
     STACKING_DIRECTION m_stacking_direction;
     CASM::PrimGrid m_grid;
 
+    /// Add candudate_struc to current_strucs if it is symmetrically distinct from each structure in curre_strucs
+    void _add_if_distinct(std::vector<Rewrap::Structure> &current_strucs, Rewrap::Structure &candidate_struc);
 
-    /// Add a new struc to skewed_strucs only if it is distinct
-    void _add_if_distinct(Rewrap::Structure candidate_struc);
+    /// Generate all skewed version of superstructure, or only symmetrically distinct ones
+    std::vector<Rewrap::Structure> _skewed_strucs(const bool distinct_only); 
 
-    /// Skew the superstructure by multiples of the in-layer lattice vectors of the prim, called a and b
-    /// a and b are defined in a cyclic manner based on the index of c (i.e. 0->a,1->b,2->c or 0->c,1->a,2->b or 0->b,1->c,2->a)
     //TODO: This has to be UCC (no rewrap available... if you're lazy just leave private)
-    Rewrap::Structure _skew_super_struc(const int a_multiple, const int b_multiple);
+    //Rewrap::Structure _skew_super_struc(const int a_multiple, const int b_multiple);
 };
 
 }

@@ -6,15 +6,16 @@
 #include "casmutils/structure.hpp"
 #include "casmutils/lattice.hpp"
 //#include <casm/crystallography/Niggli.hh>
+#include <casm/crystallography/PrimGrid.hh>
 
 namespace Simplicity
 {
     
-LayerSkewer::LayerSkewer(Rewrap::Structure prim_struc, Rewrap::Structure super_struc, const int prim_c_vec_index, const int super_c_vec_index): prim_struc(prim_struc), super_struc(super_struc), prim_c_vec_index(prim_c_vec_index), super_c_vec_index(super_c_vec_index)
+LayerSkewer::LayerSkewer(const Rewrap::Structure &prim_struc, const Rewrap::Structure &layered_struc, STACKING_DIRECTION stacking_direction): m_prim_struc(prim_struc), m_super_struc(layered_struc), m_stacking_direction(stacking_direction), m_grid(m_prim_struc.lattice(), m_super_struc.lattice())
     {
-        skewed_strucs.push_back(super_struc); // not sure the superstructure should be added initially        
     }
 
+/*
 Rewrap::Structure LayerSkewer::skew_super_struc(const int a_multiple, const int b_multiple)
     {
         // Get lattices
@@ -33,29 +34,37 @@ Rewrap::Structure LayerSkewer::skew_super_struc(const int a_multiple, const int 
 
         return new_struc;
     }
+*/
 
-void LayerSkewer::generate_skewed_strucs(const bool distinct_only)
-    {
-        // TODO
-        // loop over prim grid and generate new structures using skew_super_struc
-        
-        Rewrap::Structure new_struc = skew_super_struc(0,0);
-
-        if (distinct_only) {
-            add_if_distinct(new_struc);
-        } else {
-            skewed_strucs.push_back(new_struc);
-        }
- 
-        return;
+std::vector<Rewrap::Structure> LayerSkewer::all_skewed_strucs()
+    {   
+        return _skewed_strucs(false);
     }
 
-std::vector<Rewrap::Structure> LayerSkewer::get_skewed_strucs()
+std::vector<Rewrap::Structure> LayerSkewer::distinct_skewed_strucs()
+    {   
+        return _skewed_strucs(true);
+    }
+
+
+std::vector<Rewrap::Structure> LayerSkewer::_skewed_strucs(const bool distinct_only)
     {
+        // TODO
+        // loop over prim grid and generate new structures
+
+        Rewrap::Structure new_struc = m_super_struc;
+        std::vector<Rewrap::Structure> skewed_strucs;
+
+        if (distinct_only) {
+            _add_if_distinct(skewed_strucs, new_struc);
+        } else {
+            skewed_strucs.emplace_back(new_struc);
+        }
+             
         return skewed_strucs;
     }
 
-void LayerSkewer::add_if_distinct(Rewrap::Structure candidate_struc)
+void LayerSkewer::_add_if_distinct(std::vector<Rewrap::Structure> &current_strucs, Rewrap::Structure &candidate_struc)
     {
         // TODO
         // get vector of scores from struc_score using candidate_struc as prim
@@ -64,11 +73,10 @@ void LayerSkewer::add_if_distinct(Rewrap::Structure candidate_struc)
         
         // add if below threshold
         if (false) {
-            skewed_strucs.push_back(candidate_struc);
+            current_strucs.emplace_back(candidate_struc);
         }
 
         return;
     }
-
 
 }
