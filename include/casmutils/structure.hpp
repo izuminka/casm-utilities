@@ -9,7 +9,7 @@
 namespace Rewrap
 {
 
-class Structure : public CASM::Structure
+class Structure : public CASM::BasicStructure<CASM::Site>
 {
 public:
     Structure() = delete;
@@ -18,7 +18,7 @@ public:
     static Structure from_poscar(const fs::path& poscar_path);
 
     /// Construct from parent CASM class
-    Structure(CASM::Structure init_struc);
+    Structure(CASM::BasicStructure<CASM::Site> init_struc);
     Structure(Rewrap::fs::path& filename);
 
     /// Returns true if the structure is already primitive
