@@ -6,6 +6,14 @@
 namespace UtilExcept
 {
 
+class PrimitiveMismatch : public std::runtime_error
+{
+public:
+    PrimitiveMismatch() : std::runtime_error("The given primitive structure is not compatible!") {}
+
+private:
+};
+
 class BasisMismatch : public std::runtime_error
 {
 public:

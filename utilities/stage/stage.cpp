@@ -2,11 +2,12 @@
 
 int main()
 {
+    typedef Simplicity::LayerSkewer::STACKING_DIRECTION stack_dir;
 
     // JUST for testing
     Rewrap::fs::path test_prim_path("POSCAR_prim");
     Rewrap::fs::path test_super_path("POSCAR_super");
-    Simplicity::LayerSkewer::STACKING_DIRECTION stack_direction = Simplicity::LayerSkewer::STACKING_DIRECTION::B;
+    auto stack_direction = stack_dir::B;
 
     Rewrap::Structure test_prim(test_prim_path);
     Rewrap::Structure test_super(test_super_path);

@@ -4,6 +4,7 @@
 #include "casmutils/structure.hpp"
 #include <casm/crystallography/PrimGrid.hh>
 #include <casm/crystallography/Structure.hh>
+#include <cmath>
 
 namespace Simplicity
 {
@@ -16,13 +17,16 @@ LayerSkewer::LayerSkewer(const Rewrap::Structure& prim_struc,
       m_stacking_direction(stacking_direction),
       m_grid(m_prim_struc.lattice(), m_super_struc.lattice())
 {
+    //TODO: Throw exception if lattices aren't compatible
+    //if(bla bla)
+    //throw except::PrimitiveMismatch()
 }
 
-std::vector<Rewrap::Structure> LayerSkewer::all_skewed_strucs() { return _skewed_strucs(false); }
+std::vector<Rewrap::Structure> LayerSkewer::all_skewed_strucs() const { return _skewed_strucs(false); }
 
-std::vector<Rewrap::Structure> LayerSkewer::distinct_skewed_strucs() { return _skewed_strucs(true); }
+std::vector<Rewrap::Structure> LayerSkewer::distinct_skewed_strucs() const { return _skewed_strucs(true); }
 
-std::vector<Rewrap::Structure> LayerSkewer::_skewed_strucs(bool distinct_only)
+std::vector<Rewrap::Structure> LayerSkewer::_skewed_strucs(bool distinct_only) const
 {
     std::vector<Rewrap::Structure> skewed_strucs;
 
@@ -38,11 +42,11 @@ std::vector<Rewrap::Structure> LayerSkewer::_skewed_strucs(bool distinct_only)
             Rewrap::Structure new_struc = _skew_super_struc(unit_cell);
             if (distinct_only)
             {
-                _add_if_distinct(skewed_strucs, new_struc);
+                _add_if_distinct(&skewed_strucs, new_struc);
             }
             else
             {
-                skewed_strucs.emplace_back(new_struc);
+                skewed_strucs.emplace_back(std::move(new_struc));
             }
         }
     }
@@ -50,16 +54,16 @@ std::vector<Rewrap::Structure> LayerSkewer::_skewed_strucs(bool distinct_only)
     return skewed_strucs;
 }
 
-void LayerSkewer::_add_if_distinct(std::vector<Rewrap::Structure>& current_strucs, Rewrap::Structure& candidate_struc)
+void LayerSkewer::_add_if_distinct(std::vector<Rewrap::Structure>* current_strucs, const Rewrap::Structure& candidate_struc) const
 {
     // get structure scores
-    std::vector<std::pair<double, double>> score_vec = structure_score(candidate_struc, current_strucs);
+    auto score_vec = structure_score(candidate_struc, *current_strucs);
 
     // check structure scores
     bool candidate_is_distinct = true;
     for (const auto& score : score_vec)
     {
-        if (fmax(score.first, score.second) < CASM::TOL)
+        if (std::fmax(score.first, score.second) < CASM::TOL)
         {
             candidate_is_distinct = false;
             break;
@@ -69,13 +73,13 @@ void LayerSkewer::_add_if_distinct(std::vector<Rewrap::Structure>& current_struc
     // add if distinct
     if (candidate_is_distinct)
     {
-        current_strucs.emplace_back(candidate_struc);
+        current_strucs->emplace_back(std::move(candidate_struc));
     }
 
     return;
 }
 
-Rewrap::Structure LayerSkewer::_skew_super_struc(const CASM::UnitCell& unit_cell)
+Rewrap::Structure LayerSkewer::_skew_super_struc(const CASM::UnitCell& unit_cell) const
 {
     // get lattices
     Eigen::Matrix3d prim_lat_mat = m_prim_struc.lattice().lat_column_mat();
@@ -83,27 +87,27 @@ Rewrap::Structure LayerSkewer::_skew_super_struc(const CASM::UnitCell& unit_cell
 
     // get new lattice vector
     int stacking_direction_index = static_cast<int>(m_stacking_direction);
-    Eigen::Vector3d new_lat_vec = prim_lat_mat * unit_cell.cast<double>();
+    Eigen::Vector3d shift_vector = prim_lat_mat * unit_cell.cast<double>();
 
     // create new structure with the skewed lattice
-    CASM::Structure new_struc(m_super_struc);
-    super_lat_mat.col(stacking_direction_index) = super_lat_mat.col(stacking_direction_index) + new_lat_vec;
+    Rewrap::Structure new_struc(m_super_struc);
+    super_lat_mat.col(stacking_direction_index) = super_lat_mat.col(stacking_direction_index) + shift_vector;
     CASM::Lattice new_lat(super_lat_mat);
     new_struc.set_lattice(new_lat, CASM::CART);
-    return Rewrap::Structure(new_struc);
+    return new_struc;
 }
 
-bool LayerSkewer::_on_layer_surface(const CASM::UnitCell& unit_cell)
+bool LayerSkewer::_on_layer_surface(const CASM::UnitCell& unit_cell) const
 {
     // get lattice vector corresponding to unit cell
     int stacking_direction_index = static_cast<int>(m_stacking_direction);
     Eigen::Matrix3d prim_lat_mat = m_prim_struc.lattice().lat_column_mat();
-    Eigen::Vector3d new_lat_vec = prim_lat_mat * unit_cell.cast<double>();
+    Eigen::Vector3d shift_vector = prim_lat_mat * unit_cell.cast<double>();
 
     // check if it has a component along stacking direction
-    CASM::Coordinate d(new_lat_vec, m_super_struc.lattice(), CASM::CART);
+    CASM::Coordinate d(shift_vector, m_super_struc.lattice(), CASM::CART);
     Eigen::Vector3d d_frac = d.frac();
-    return (d_frac[stacking_direction_index] < CASM::TOL);
+    return (CASM::almost_zero(d_frac[stacking_direction_index]));
 }
 
 } // namespace Simplicity
