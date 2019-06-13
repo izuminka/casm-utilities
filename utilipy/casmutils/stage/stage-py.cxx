@@ -13,11 +13,24 @@ PYBIND11_MODULE(_stage, m)
     using namespace pybind11;
     using namespace WrapPy;
 
-    class_<SpecializedEnumeration::LayerSkewer>(m, "LayerSkewer")
-        .def("is_primitive", &Rewrap::Structure::is_primitive)
-        .def("primitive", &Rewrap::Structure::primitive)
-    m.doc() = "This is only temporary, don't get too attached. Make it a real module.";
+    //TODO: Make this not a class, just standalone functions (use WrapPy or redefine them in python)
 
-    m.def("example", WrapPy::example);
+    m.doc() = "The skewer class takes a supercell and will skew the c vector to create new orderings.";
+
+    class_<SpecializedEnumeration::LayerSkewer>layerskewer(m, "LayerSkewer");
+
+        layerskewer.def(init<const Rewrap::Structure,const Rewrap::Structure,SpecializedEnumeration::LayerSkewer::STACKING_DIRECTION>())
+        .def("distinct_skewed_strucs", &SpecializedEnumeration::LayerSkewer::distinct_skewed_strucs)
+        .def("all_skewed_strucs", &SpecializedEnumeration::LayerSkewer::all_skewed_strucs);
+
+    /* std::vector<Rewrap::Structure> distinct_skewed_strucs() const; */
+    /// Generate all possible skewed versions of superstructure, even if symmetrically equivalent
+    /* std::vector<Rewrap::Structure> all_skewed_strucs() const; */
+
+    enum_<SpecializedEnumeration::LayerSkewer::STACKING_DIRECTION>(layerskewer, "STACKING_DIRECTION")
+    .value("A", SpecializedEnumeration::LayerSkewer::STACKING_DIRECTION::A)
+    .value("B", SpecializedEnumeration::LayerSkewer::STACKING_DIRECTION::B)
+    .value("C", SpecializedEnumeration::LayerSkewer::STACKING_DIRECTION::C)
+    .export_values();
 }
 }

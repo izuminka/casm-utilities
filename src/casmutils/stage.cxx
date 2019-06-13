@@ -6,7 +6,7 @@
 #include <casm/crystallography/Structure.hh>
 #include <cmath>
 
-namespace Simplicity
+namespace SpecializedEnumeration
 {
 
 LayerSkewer::LayerSkewer(const Rewrap::Structure& prim_struc,
@@ -57,7 +57,7 @@ std::vector<Rewrap::Structure> LayerSkewer::_skewed_strucs(bool distinct_only) c
 void LayerSkewer::_add_if_distinct(std::vector<Rewrap::Structure>* current_strucs, const Rewrap::Structure& candidate_struc) const
 {
     // get structure scores
-    auto score_vec = structure_score(candidate_struc, *current_strucs);
+    auto score_vec = Simplicity::structure_score(candidate_struc, *current_strucs);
 
     // check structure scores
     bool candidate_is_distinct = true;

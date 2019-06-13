@@ -2,7 +2,7 @@
 
 int main()
 {
-    typedef Simplicity::LayerSkewer::STACKING_DIRECTION stack_dir;
+    typedef SpecializedEnumeration::LayerSkewer::STACKING_DIRECTION stack_dir;
 
     // JUST for testing
     Rewrap::fs::path test_prim_path("POSCAR_prim");
@@ -12,7 +12,7 @@ int main()
     Rewrap::Structure test_prim(test_prim_path);
     Rewrap::Structure test_super(test_super_path);
    
-    Simplicity::LayerSkewer test_skewer(test_prim, test_super, stack_direction);
+    SpecializedEnumeration::LayerSkewer test_skewer(test_prim, test_super, stack_direction);
     
     // all structures
     std::cout << "generating all skewed structures...";
